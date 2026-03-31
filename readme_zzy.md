@@ -161,7 +161,7 @@ To generate the full HumanEval test set:
 
 ```bash
 cd src
-python test_designer_demo.py
+python generate_designer_tests.py
 ```
 
 Output:
