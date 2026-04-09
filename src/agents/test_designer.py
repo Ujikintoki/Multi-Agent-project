@@ -17,7 +17,7 @@ deployment_name = os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT")
 
 
 class TestDesignerAgent:
-    def __init__(self):
+    def __init__(self, debug: bool = False):
         if not api_key:
             raise ValueError("Missing AZURE_OPENAI_API_KEY in .env")
         if not api_version:
@@ -35,6 +35,7 @@ class TestDesignerAgent:
             timeout=60.0,
         )
         self.model = deployment_name
+        self.debug = debug
 
     async def generate_tests(self, task_id: str, problem_prompt: str) -> dict:
         """
@@ -42,11 +43,12 @@ class TestDesignerAgent:
 
         Returns:
             {
-                "task_id": ...,
-                "tests": ...
+                "task_id": "...",
+                "tests": "..."
             }
         """
         try:
+            # First attempt: normal prompt
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -56,12 +58,74 @@ class TestDesignerAgent:
                         "content": build_designer_user_prompt(problem_prompt),
                     },
                 ],
-                max_tokens=700,
-                temperature=0.2,
+                max_tokens=2000,
             )
 
-            raw_text = response.choices[0].message.content or ""
+            choice = response.choices[0]
+            message = choice.message
+
+            if self.debug:
+                print("===== FINISH REASON =====")
+                print(choice.finish_reason)
+                print("===== END FINISH REASON =====")
+
+                print("===== RAW MESSAGE CONTENT =====")
+                print(message.content)
+                print("===== END RAW MESSAGE CONTENT =====")
+
+            raw_text = self._extract_text_from_message_content(message.content)
+
+            # Retry once if the model got cut off before producing visible content
+            if choice.finish_reason == "length" and not raw_text.strip():
+                if self.debug:
+                    print("===== RETRYING WITH SHORTER PROMPT =====")
+
+                short_user_prompt = (
+                    f"Generate a small set of high-confidence Python assert tests for this "
+                    f"HumanEval problem.\n\n"
+                    f"{problem_prompt}\n\n"
+                    f"Requirements:\n"
+                    f"- Return only Python test code\n"
+                    f"- Use assert statements\n"
+                    f"- No explanations\n"
+                    f"- No markdown fences\n"
+                    f"- Prefer fewer but reliable tests\n"
+                )
+
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": DESIGNER_SYSTEM_PROMPT},
+                        {"role": "user", "content": short_user_prompt},
+                    ],
+                    max_tokens=2000,
+                )
+
+                choice = response.choices[0]
+                message = choice.message
+
+                if self.debug:
+                    print("===== RETRY FINISH REASON =====")
+                    print(choice.finish_reason)
+                    print("===== END RETRY FINISH REASON =====")
+
+                    print("===== RETRY RAW MESSAGE CONTENT =====")
+                    print(message.content)
+                    print("===== END RETRY RAW MESSAGE CONTENT =====")
+
+                raw_text = self._extract_text_from_message_content(message.content)
+
+            if self.debug:
+                print("===== RAW MODEL OUTPUT =====")
+                print(raw_text)
+                print("===== END RAW MODEL OUTPUT =====")
+
             cleaned_tests = self._clean_output(raw_text)
+
+            if self.debug:
+                print("===== CLEANED TESTS =====")
+                print(cleaned_tests)
+                print("===== END CLEANED TESTS =====")
 
             return {
                 "task_id": task_id,
@@ -75,6 +139,36 @@ class TestDesignerAgent:
                 "tests": "",
             }
 
+    def _extract_text_from_message_content(self, content) -> str:
+        """
+        Extract plain text from the model response content.
+        Supports both plain string content and structured content lists.
+        """
+        if content is None:
+            return ""
+
+        if isinstance(content, str):
+            return content.strip()
+
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                # Dictionary-style content block
+                if isinstance(part, dict):
+                    if part.get("type") == "text" and "text" in part:
+                        text_parts.append(part["text"])
+
+                # Object-style content block
+                else:
+                    if getattr(part, "type", None) == "text":
+                        text_value = getattr(part, "text", "")
+                        if text_value:
+                            text_parts.append(text_value)
+
+            return "\n".join(text_parts).strip()
+
+        return str(content).strip()
+
     def _clean_output(self, text: str) -> str:
         """
         Clean model output so it is easier for executor to run.
@@ -87,7 +181,6 @@ class TestDesignerAgent:
         text = text.replace("```", "")
         text = text.strip()
 
-        # Remove accidental leading phrases before first useful line
         lines = text.splitlines()
         cleaned_lines = []
 
@@ -108,13 +201,12 @@ class TestDesignerAgent:
                 cleaned_lines.append(line)
                 continue
 
-            # Keep simple helper/test data definitions
+            # Keep helper/test data definitions
             if self._is_allowed_code_line(stripped):
                 cleaned_lines.append(line)
                 continue
 
-            # Otherwise drop obvious natural language lines
-            # Example: "Here are the test cases:"
+            # Drop obvious natural language lines
             if not self._looks_like_code(stripped):
                 continue
 
@@ -178,4 +270,5 @@ class TestDesignerAgent:
         for pattern in code_patterns:
             if re.match(pattern, line):
                 return True
+
         return False
