@@ -33,7 +33,7 @@ class ProgrammerAgent:
         ]
 
         raw_response = await self.llm_client.generate_response(
-            messages, temperature=0.2
+            messages, temperature=1.0
         )
         return self._extract_code(raw_response)
 
@@ -53,7 +53,7 @@ class ProgrammerAgent:
         ]
 
         raw_response = await self.llm_client.generate_response(
-            messages, temperature=0.2
+            messages, temperature=1.0
         )
         return self._extract_code(raw_response)
         return self._extract_code(raw_response)

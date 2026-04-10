@@ -35,7 +35,7 @@ class AsyncLLMClient:
         self.max_retries = max_retries
 
     async def generate_response(
-        self, messages: List[Dict[str, str]], temperature: float = 0.2
+        self, messages: List[Dict[str, str]], temperature: float = 1.0
     ) -> Optional[str]:
         """Send an async chat completion request with built-in retry logic."""
         attempt = 0

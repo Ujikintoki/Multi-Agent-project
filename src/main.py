@@ -6,8 +6,8 @@ from typing import Any, Dict
 
 from datasets import load_dataset
 
-from .agents.llm_client import AsyncLLMClient
-from .agents.programmer import ProgrammerAgent
+from src.agents.llm_client import AsyncLLMClient
+from src.agents.programmer import ProgrammerAgent
 
 
 # ============================================================================
