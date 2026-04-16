@@ -9,21 +9,26 @@ from datasets import load_dataset
 from src.agents.llm_client import AsyncLLMClient
 from src.agents.programmer import ProgrammerAgent
 
+from src.agents.test_designer import TestDesignerAgent
+from src.test_executor import TestExecutor
+
 
 # ============================================================================
 # MOCK CLASSES (To be replaced when you implement the actual modules)
 # ============================================================================
-class MockTestDesigner:
-    async def generate_tests(self, problem_prompt: str) -> str:
-        """Placeholder for the Test Designer Agent."""
-        return "assert True # Mock test case"
+# class MockTestDesigner:
+#     async def generate_tests(self, problem_prompt: str) -> str:
+#         """Placeholder for the Test Designer Agent."""
+#         return "assert True # Mock test case"
 
 
-class MockExecutor:
-    def execute(self, code: str, tests: str) -> Dict[str, Any]:
-        """Placeholder for the Python execution sandbox."""
-        # Assume it passes for the sake of pipeline testing
-        return {"success": True, "feedback": "All tests passed."}
+# class MockExecutor:
+#     def execute(self, code: str, tests: str) -> Dict[str, Any]:
+#         """Placeholder for the Python execution sandbox."""
+#         # Assume it passes for the sake of pipeline testing
+#         return {"success": True, "feedback": "All tests passed."}
+designer = TestDesignerAgent(debug=False)
+executor = TestExecutor(timeout=10)
 
 
 # ============================================================================
@@ -32,8 +37,8 @@ class MockExecutor:
 async def process_single_task(
     task: Dict[str, Any],
     programmer: ProgrammerAgent,
-    designer: MockTestDesigner,
-    executor: MockExecutor,
+    designer: TestDesignerAgent,
+    executor: TestExecutor,
     semaphore: asyncio.Semaphore,
     max_reflections: int = 3,
 ) -> Dict[str, str]:
@@ -56,13 +61,22 @@ async def process_single_task(
             return {"task_id": task_id, "completion": ""}
 
         # Step 2: Test Case Generation
-        test_cases = await designer.generate_tests(prompt)
+        # test_cases = await designer.generate_tests(prompt)
+        test_cases_response = await designer.generate_tests(task_id, prompt)
+        test_cases = test_cases_response.get("tests", "")
 
         # Step 3: Execution and Reflection Loop
         for attempt in range(max_reflections):
-            exec_result = executor.execute(current_code, test_cases)
-
-            if exec_result["success"]:
+            # exec_result = executor.execute(current_code, test_cases)
+            exec_result = await asyncio.to_thread(
+                executor.run_single_test, task_id, current_code, test_cases
+            )
+            # if exec_result["success"]:
+            #     print(
+            #         f"[Task Success] {task_id} passed tests on attempt {attempt + 1}."
+            #     )
+            #     break
+            if exec_result.get("passed"):  # 确保这里用的是 passed 而不是 success
                 print(
                     f"[Task Success] {task_id} passed tests on attempt {attempt + 1}."
                 )
@@ -99,8 +113,8 @@ async def main():
     # 1. Initialize Clients and Agents
     llm_client = AsyncLLMClient()
     programmer = ProgrammerAgent(llm_client)
-    designer = MockTestDesigner()  # Replace with actual TestDesigner later
-    executor = MockExecutor()  # Replace with actual Executor later
+    designer = TestDesignerAgent()
+    executor = TestExecutor()
 
     # 2. Setup Concurrency Control
     # Limit to 10 concurrent tasks to avoid hitting Azure OpenAI rate limits

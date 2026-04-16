@@ -3,7 +3,7 @@ import re
 from dotenv import load_dotenv
 from openai import AsyncAzureOpenAI
 
-from prompts.designer_prompt import (
+from src.prompts.designer_prompt import (
     DESIGNER_SYSTEM_PROMPT,
     build_designer_user_prompt,
 )

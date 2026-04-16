@@ -56,4 +56,3 @@ class ProgrammerAgent:
             messages, temperature=1.0
         )
         return self._extract_code(raw_response)
-        return self._extract_code(raw_response)

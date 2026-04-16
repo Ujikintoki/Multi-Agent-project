@@ -74,5 +74,3 @@ class AsyncLLMClient:
 
         print("[Error] Max retries reached or fatal error. Returning None.")
         return None
-        return None
-        return None
