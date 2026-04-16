@@ -101,7 +101,19 @@ async def process_single_task(
                 )
                 break
 
-        return {"task_id": task_id, "completion": current_code}
+        # return {"task_id": task_id, "completion": current_code}
+        passed_designer = (
+            exec_result.get("passed", False) if "exec_result" in locals() else False
+        )
+
+        # 将更丰富的运行数据打包返回
+        return {
+            "task_id": task_id,
+            "completion": current_code,
+            "generated_tests": test_cases,  # 用于评估 Metric 4 (测试生成有效率)
+            "passed_designer_tests": passed_designer,  # 用于评估 Metric 2 (假阳性率)
+            "attempts_used": attempt + 1,  # 用于评估 Metric 3 (平均反思步数)
+        }
 
 
 # ============================================================================
