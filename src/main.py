@@ -40,7 +40,8 @@ async def process_single_task(
     designer: TestDesignerAgent,
     executor: TestExecutor,
     semaphore: asyncio.Semaphore,
-    max_reflections: int = 3,
+    # max_reflections: int = 3,
+    max_reflections: int = 1,
 ) -> Dict[str, str]:
     """
     Executes the full AgentCoder pipeline for a single HumanEval problem.
@@ -158,7 +159,7 @@ async def main():
     # The standard format for HumanEval eval is JSONL (one JSON object per line)
     output_dir = "data"
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, "agentcoder_results.jsonl")
+    output_file = os.path.join(output_dir, "agentcoder_results_refine1time.jsonl")
 
     with open(output_file, "w", encoding="utf-8") as f:
         for res in results:

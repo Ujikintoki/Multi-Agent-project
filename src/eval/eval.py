@@ -51,7 +51,11 @@ def main():
     dataset = load_dataset("openai_humaneval", split="test")
     official_data = {item["task_id"]: item for item in dataset}
 
-    results_path = "data/agentcoder_results.jsonl"
+    # results_path = "data/agentcoder_results.jsonl"
+    results_path = (
+        "data/zeroshot_baseline_results.jsonl"  # 如果评估零样本基线，改成这个路径
+    )
+    # results_path = "data/agentcoder_results_refine2time.jsonl"  # 如果评估第二轮优化的结果，改成这个路径
     print(f"Loading generated completions from {results_path}...")
     completions = load_results(results_path)
 
