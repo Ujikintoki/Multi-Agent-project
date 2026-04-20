@@ -79,12 +79,9 @@ The evaluation metrics will be exported as JSON reports in the results/ director
 ```text
 .
 ├── data
-│   ├── agentcoder_results.jsonl
 │   ├── agentcoder_results_refine1time.jsonl
 │   ├── agentcoder_results_refine2times.jsonl
 │   ├── agentcoder_results_refine3times.jsonl
-│   ├── baseline_samples.jsonl
-│   ├── designer_tests.jsonl
 │   └── zeroshot_baseline_results.jsonl
 ├── readme.md
 ├── requirements.txt
