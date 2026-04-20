@@ -7,12 +7,12 @@ Models (LLMs) to solve multi-step software engineering tasks designed for the CS
 
 It is recommended to use a virtual environment to manage dependencies.
 
-# 1. Create a virtual environment
+1. Create a virtual environment
 ```bash
 python3 -m venv venv
 ```
 
-# 2. Activate the environment
+2. Activate the environment
 For macOS/Linux:
 ```bash
 source venv/bin/activate
@@ -22,7 +22,7 @@ For Windows:
 venv\Scripts\activate
 ```
 
-# 3. Install required dependencies
+3. Install required dependencies
 ```bash
 pip install -r requirements.txt
 ```
