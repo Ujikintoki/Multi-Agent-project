@@ -7,17 +7,23 @@ Models (LLMs) to solve multi-step software engineering tasks designed for the CS
 
 It is recommended to use a virtual environment to manage dependencies.
 
-```bash
 # 1. Create a virtual environment
+```bash
 python3 -m venv venv
+```
 
 # 2. Activate the environment
-# For macOS/Linux:
+For macOS/Linux:
+```bash
 source venv/bin/activate
-# For Windows:
+```
+For Windows:
+```bash
 venv\Scripts\activate
+```
 
 # 3. Install required dependencies
+```bash
 pip install -r requirements.txt
 ```
 
@@ -59,7 +65,7 @@ python3 src/eval/eval.py
 The evaluation metrics will be exported as JSON reports in the results/ directory.
 
 ## 4. Project Structure Overview
-- data/: Contains JSONL outputs for different experimental runs (zero-shot, refinements) and generated designer tests.**
+- data/: Contains JSONL outputs for different experimental runs (zero-shot, refinements) and generated designer tests.
 
 - results/: Stores the final evaluation reports (e.g., Pass@1 metrics, attempt costs).
 
