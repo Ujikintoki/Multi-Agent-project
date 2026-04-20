@@ -13,6 +13,7 @@ python3 -m venv venv
 ```
 
 2. Activate the environment
+
 For macOS/Linux:
 ```bash
 source venv/bin/activate
