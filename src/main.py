@@ -10,7 +10,7 @@ from src.agents.llm_client import AsyncLLMClient
 from src.agents.programmer import ProgrammerAgent
 
 from src.agents.test_designer import TestDesignerAgent
-from src.test_executor import TestExecutor
+from src.execution.test_executor import TestExecutor
 
 
 # ============================================================================

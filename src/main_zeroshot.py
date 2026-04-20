@@ -8,7 +8,6 @@ from datasets import load_dataset
 
 from src.agents.llm_client import AsyncLLMClient
 from src.agents.programmer import ProgrammerAgent
-# 注意：我们这里甚至都不需要导入 Designer 和 Executor 了
 
 
 # ============================================================================
