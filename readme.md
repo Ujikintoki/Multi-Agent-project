@@ -79,17 +79,9 @@ The evaluation metrics will be exported as JSON reports in the results/ director
 ```text
 .
 ├── data
-│   ├── agentcoder_results_refine1time.jsonl
-│   ├── agentcoder_results_refine2times.jsonl
-│   ├── agentcoder_results_refine3times.jsonl
-│   └── zeroshot_baseline_results.jsonl
 ├── readme.md
 ├── requirements.txt
 ├── results
-│   ├── eval_report_20260417_155725_refine1.json
-│   ├── eval_report_20260417_155829_refine2.json
-│   ├── eval_report_20260417_161124_zeroshot.json
-│   └── eval_report_20260417_204222_refine3.json
 └── src
     ├── __init__.py
     ├── agents
@@ -102,6 +94,7 @@ The evaluation metrics will be exported as JSON reports in the results/ director
     │   └── eval.py
     ├── execution
     │   └── test_executor.py
+    ├── main_fixed_baseline.py
     ├── main.py
     ├── main_zeroshot.py
     ├── prompts
